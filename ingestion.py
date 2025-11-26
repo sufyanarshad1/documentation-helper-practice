@@ -2,13 +2,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import ReadTheDocsLoader
-from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain_pinecone import PineconeVectorStore
 
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-
+embeddings = OllamaEmbeddings(model="mxbai-embed-large:latest")
 
 def ingest_docs():
     loader = ReadTheDocsLoader("langchain-docs/langchain.readthedocs.io/en/v0.1")
@@ -25,7 +24,7 @@ def ingest_docs():
 
     print(f"Going to add {len(documents)} to Pinecone")
     PineconeVectorStore.from_documents(
-        documents, embeddings, index_name="langchain-doc-index"
+        documents, embeddings, index_name="documentation-helper-index"
     )
     print("****Loading to vectorstore done ***")
 
