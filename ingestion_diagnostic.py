@@ -39,9 +39,9 @@ def test_single_embedding():
     print("\n🧪 Testing single embedding generation...")
     test_doc = Document(
         page_content="This is a test document to measure embedding speed. " * 20,
-        metadata={"source": "test"}
+        metadata={"source": "test"},
     )
-    
+
     start_time = time.time()
     vectorstore.add_documents([test_doc])
     elapsed = time.time() - start_time
@@ -55,27 +55,29 @@ def test_batch_embedding(batch_size: int):
     test_docs = [
         Document(
             page_content=f"This is test document {i}. " * 20,
-            metadata={"source": f"test_{i}"}
+            metadata={"source": f"test_{i}"},
         )
         for i in range(batch_size)
     ]
-    
+
     start_time = time.time()
     vectorstore.add_documents(test_docs)
     elapsed = time.time() - start_time
-    print(f"⏱️  Batch of {batch_size} documents took: {elapsed:.2f}s ({elapsed/batch_size:.2f}s per doc)")
+    print(
+        f"⏱️  Batch of {batch_size} documents took: {elapsed:.2f}s ({elapsed/batch_size:.2f}s per doc)"
+    )
     return elapsed
 
 
 def test_parallel_batches():
     """Test parallel batch processing"""
     print("\n🧪 Testing parallel batch processing...")
-    
+
     async def add_batch_async(batch_id: int, size: int):
         test_docs = [
             Document(
                 page_content=f"Parallel test document {batch_id}-{i}. " * 20,
-                metadata={"source": f"parallel_{batch_id}_{i}"}
+                metadata={"source": f"parallel_{batch_id}_{i}"},
             )
             for i in range(size)
         ]
@@ -84,7 +86,7 @@ def test_parallel_batches():
         elapsed = time.time() - start
         print(f"  ✓ Batch {batch_id} ({size} docs) took: {elapsed:.2f}s")
         return elapsed
-    
+
     async def run_parallel():
         start_time = time.time()
         # Run 4 batches of 10 docs in parallel
@@ -94,7 +96,7 @@ def test_parallel_batches():
         print(f"    Average per batch: {sum(results)/len(results):.2f}s")
         print(f"    Speedup vs sequential: {sum(results)/total_elapsed:.1f}x")
         return total_elapsed
-    
+
     return asyncio.run(run_parallel())
 
 
@@ -102,7 +104,7 @@ def check_ollama_performance():
     """Check if Ollama is responding quickly"""
     print("\n🧪 Testing Ollama API response time...")
     import requests
-    
+
     start_time = time.time()
     try:
         response = requests.get("http://localhost:11434/api/tags", timeout=5)
@@ -115,28 +117,32 @@ def check_ollama_performance():
 
 
 if __name__ == "__main__":
-    print("="*60)
+    print("=" * 60)
     print("🔍 CHROMADB PERFORMANCE DIAGNOSTICS")
-    print("="*60)
-    
+    print("=" * 60)
+
     check_ollama_performance()
-    
+
     single_time = test_single_embedding()
-    
+
     batch_10_time = test_batch_embedding(10)
-    
+
     batch_50_time = test_batch_embedding(50)
-    
+
     parallel_time = test_parallel_batches()
-    
-    print("\n" + "="*60)
+
+    print("\n" + "=" * 60)
     print("📊 SUMMARY")
-    print("="*60)
+    print("=" * 60)
     print(f"Single doc:        {single_time:.2f}s")
     print(f"Batch of 10:       {batch_10_time:.2f}s ({batch_10_time/10:.2f}s per doc)")
     print(f"Batch of 50:       {batch_50_time:.2f}s ({batch_50_time/50:.2f}s per doc)")
     print(f"4 parallel x 10:   {parallel_time:.2f}s")
     print(f"\n💡 Estimated time for 1000 docs:")
-    print(f"   Sequential (batches of 50): {(1000/50) * batch_50_time:.0f}s = {(1000/50) * batch_50_time/60:.1f} minutes")
-    print(f"   Parallel (4x batches of 50): {(1000/50/4) * parallel_time:.0f}s = {(1000/50/4) * parallel_time/60:.1f} minutes")
-    print("="*60)
+    print(
+        f"   Sequential (batches of 50): {(1000/50) * batch_50_time:.0f}s = {(1000/50) * batch_50_time/60:.1f} minutes"
+    )
+    print(
+        f"   Parallel (4x batches of 50): {(1000/50/4) * parallel_time:.0f}s = {(1000/50/4) * parallel_time/60:.1f} minutes"
+    )
+    print("=" * 60)
