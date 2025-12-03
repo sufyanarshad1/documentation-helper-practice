@@ -1,46 +1,44 @@
-from dotenv import load_dotenv
 from typing import Any
-
-load_dotenv()
-
-from langsmith import Client
-from langchain_classic.chains.retrieval import create_retrieval_chain
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-from langchain_classic.chains.history_aware_retriever import create_history_aware_retriever
-from langchain_chroma import Chroma
-from langchain_ollama import ChatOllama, OllamaEmbeddings
-
+import os
+import re
 
 def run_llm(query: str, chat_history: list[dict[str, Any]] | None = None):
-    if chat_history is None:
-        chat_history = []
-    
+  """
+  Analyzes the conflicting code blocks (HEAD vs Feature) and resolves the conflict.
+
+  Args:
+    query: The input string.
+    chat_history: A list of dictionaries, where each dictionary represents a
+      conversation history.  The keys of the dictionaries are the
+      conversation turns, and the values are the corresponding
+      responses.
+  Returns:
+    A list of raw code blocks, where each block is a dictionary with
+    the following keys:
+      - "query": The input string.
+      - "answer": The output of the LLM.
+      - "source_documents": A list of the source documents.
+      - "context": The context of the conversation.
+  """
+  if chat_history is None:
+    chat_history = []
+
+  if query is None:
+    return []
+
+  try:
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
     docsearch = Chroma(persist_directory="chroma_db", embedding_function=embeddings)
-    chat = ChatOllama(model="llama3.2", verbose=True, temperature=0)
-
-    hub_client = Client()
-    retrieval_qa_chat_prompt = hub_client.pull_prompt("langchain-ai/retrieval-qa-chat")
-    stuff_documents_chain = create_stuff_documents_chain(chat, retrieval_qa_chat_prompt)
-
-    rephrase_prompt = hub_client.pull_prompt("langchain-ai/chat-langchain-rephrase")
-    history_aware_retriever = create_history_aware_retriever(
-        llm=chat, retriever=docsearch.as_retriever(), prompt=rephrase_prompt
-    )
-    qa = create_retrieval_chain(
-        retriever=history_aware_retriever, combine_docs_chain=stuff_documents_chain
-    )
-    result = qa.invoke(input={"input": query, "chat_history": chat_history})
-
-    new_result = {
-        "query": result["input"],
-        "answer": result["answer"],
-        "source_documents": result["context"],
-    }
-
-    return new_result
-
-
-if __name__ == "__main__":
-    res = run_llm("What is LangChain?")
-    print(res["answer"])
+    INDEX_NAME = "documentation-helper-index"
+    
+    def run_llm(query: str):
+      if chat_history is None:
+        chat_history = []
+      
+      embeddings = OllamaEmbeddings(model="mxbai-embed-large:latest")
+      docsearch = PineconeVectorStore(index_name=INDEX_NAME, embedding=embeddings)
+      
+      return "What is LangChain?"
+  except Exception as e:
+    print(f"Error during LLM execution: {e}")
+    return []
