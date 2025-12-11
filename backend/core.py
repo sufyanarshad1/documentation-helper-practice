@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 from typing import Any
-
 load_dotenv()
 
 from langsmith import Client
@@ -9,7 +8,6 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_classic.chains.history_aware_retriever import create_history_aware_retriever
 from langchain_chroma import Chroma
 from langchain_ollama import ChatOllama, OllamaEmbeddings
-
 
 def run_llm(query: str, chat_history: list[dict[str, Any]] | None = None):
     if chat_history is None:
@@ -39,7 +37,6 @@ def run_llm(query: str, chat_history: list[dict[str, Any]] | None = None):
     }
 
     return new_result
-
 
 if __name__ == "__main__":
     res = run_llm("What is LangChain?")
