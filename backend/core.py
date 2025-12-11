@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 from typing import Any
-
 load_dotenv()
 
 from langsmith import Client
@@ -9,14 +8,16 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_classic.chains.history_aware_retriever import create_history_aware_retriever
 from langchain_chroma import Chroma
 from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain_pinecone import PineconeVectorStore
 
+INDEX_NAME = "documentation-helper-index"
 
 def run_llm(query: str, chat_history: list[dict[str, Any]] | None = None):
     if chat_history is None:
         chat_history = []
-    
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")
-    docsearch = Chroma(persist_directory="chroma_db", embedding_function=embeddings)
+
+    embeddings = OllamaEmbeddings(model="mxbai-embed-large:latest")
+    docsearch = PineconeVectorStore(index_name=INDEX_NAME, embedding=embeddings)
     chat = ChatOllama(model="llama3.2", verbose=True, temperature=0)
 
     hub_client = Client()
@@ -39,7 +40,6 @@ def run_llm(query: str, chat_history: list[dict[str, Any]] | None = None):
     }
 
     return new_result
-
 
 if __name__ == "__main__":
     res = run_llm("What is LangChain?")
