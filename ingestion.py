@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import ReadTheDocsLoader
 from langchain_ollama import OllamaEmbeddings
-from langchain_pinecone import PineconeVectorStore
+from langchain_chroma import ChromaDB
 
 from logger import Colors, log_error, log_header, log_info, log_success, log_warning
 
@@ -33,8 +33,8 @@ def ingest_docs():
         new_url = new_url.replace("langchain-docs", "https:/")
         doc.metadata.update({"source": new_url})
 
-    print(f"Going to add {len(documents)} to Pinecone")
-    PineconeVectorStore.from_documents(
+    print(f"Going to add {len(documents)} to ChromaDB")
+    ChromaDB.from_documents(
         documents, embeddings, index_name="documentation-helper-index"
     )
     print("****Loading to vectorstore done ***")

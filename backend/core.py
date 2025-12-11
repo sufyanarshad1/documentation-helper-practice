@@ -17,7 +17,7 @@ def run_llm(query: str, chat_history: list[dict[str, Any]] | None = None):
         chat_history = []
 
     embeddings = OllamaEmbeddings(model="mxbai-embed-large:latest")
-    docsearch = PineconeVectorStore(index_name=INDEX_NAME, embedding=embeddings)
+    docsearch = Chroma(index_name=INDEX_NAME, embedding=embeddings)
     chat = ChatOllama(model="llama3.2", verbose=True, temperature=0)
 
     hub_client = Client()
