@@ -51,3 +51,11 @@ if st.session_state["chat_answer_history"]:
     ):
         st.chat_message("user").write(user_query)
         st.chat_message("assistant").write(generated_response)
+
+
+def main():
+    print("Hello from documentation-helper!")
+
+
+if __name__ == "__main__":
+    main()
